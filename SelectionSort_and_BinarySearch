@@ -1,0 +1,117 @@
+/*this source code is written by amkorousagi when in 2016/06/11
+this code shows practice about Selection Sort and Binary Search
+excute: get some integer by FILE input, sort that by selection sort, detect an integer designated by FILE input by binary search in sorted list
+selection sort's time complexity: big O of n^2, */
+#define _CRT_SECURE_NO_WARNINGS
+#define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
+#define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
+#include <stdio.h>
+#include <stdlib.h>
+
+FILE* fout = fopen("output.txt", "w");
+
+void selectionSort(int* list, int n);
+int* iterativeBinarySearch(int data ,int* list, int n);
+int* recursiveBinarySearch(int data, int* list, int left, int right);
+void printList(int* list, int n);
+
+int main() {
+	FILE* fin = fopen("input.txt", "r");
+	int data;
+	int* list;
+	int n;//count of input integer
+	int m;//count of input integer
+	int* pData = NULL;
+
+	fscanf(fin, "%d", &n);
+	list = (int*)malloc(sizeof(int)*n);
+
+	for (int i = 0; i < n; i++) {
+		fscanf(fin, "%d", &data);
+		list[i] = data;
+	}
+	printList(list, n);
+	selectionSort(list, n);
+	printList(list, n);
+
+	fscanf(fin, "%d", &m);
+
+	for (int i = 0; i < m; i++) {
+		fscanf(fin, "%d", &data);
+		
+		pData =iterativeBinarySearch(data, list, n);
+		if (pData != NULL) {
+			fprintf(fout, "%d\n", *pData);
+		}
+		else {
+			fprintf(fout, "%d is not included in this list\n", data);
+		}
+	}
+
+	fscanf(fin, "%d", &m);
+	for (int i = 0; i < m; i++) {
+		fscanf(fin, "%d", &data);
+		pData = recursiveBinarySearch(data, list, 0,n-1);
+		if (pData != NULL) {
+			fprintf(fout, "%d\n", *pData);
+		}
+		else {
+			fprintf(fout, "%d is not included in this list\n", data);
+		}
+	}
+
+
+	fclose(fin);
+	fclose(fout);
+	return 0;
+}
+void selectionSort(int* list, int n) {
+	int min;
+	int temp;
+	for (int i = 0; i < n; i++) {
+		min = i;
+		for (int j = i + 1; j < n; j++) {
+			if (list[j] < list[min]) {
+				min = j;
+			}
+		}//this loop ended, min means index of smallest element in list
+		SWAP(temp, list[i], list[min]);//fill the smallest of remaining ones in from the front
+	}
+}
+int* iterativeBinarySearch(int data, int* list, int n) {
+	int left = 0;
+	int right = n - 1;
+	int mid;
+	while (left <= right) {
+		mid = (left + right) / 2;
+		switch ((COMPARE(list[mid], data))) {
+		case -1: left = mid + 1;//if data is bigger list[mid], search right side
+			break;
+		case 0: return &list[mid];//if data is equal list[mid], return adress of list[mid]
+			
+		case 1: right = mid - 1;//if data is smaller list[mid], search left side
+			
+		}
+	}
+	return NULL;//if fail return NULL
+}
+int* recursiveBinarySearch(int data, int* list, int left, int right) {
+	if (left <= right) {
+		int mid = (left + right) / 2;
+		switch (COMPARE(list[mid], data)) {
+		case -1: return recursiveBinarySearch(data, list, mid + 1, right);//if data is bigger list[mid], search right side
+			break;
+		case 0: return &list[mid];//if data is equal list[mid], return adress of list[mid]
+			break;
+		case 1: return recursiveBinarySearch(data, list, left, mid - 1);//if data is smaller list[mid], search left side
+
+		}
+	}
+	return NULL;//if fail return NULL
+}
+void printList(int* list, int n) {
+	for (int i = 0; i < n; i++) {
+		fprintf(fout, "%d ", list[i]);
+	}
+	fprintf(fout, "\n");
+}
