@@ -1,7 +1,7 @@
 /*this source code is written by amkorousagi when in 2016/06/11
 this code shows practice about Selection Sort and Binary Search
 excute: get some integer by FILE input, sort that by selection sort, detect an integer designated by FILE input by binary search in sorted list
-selection sort's time complexity: big O of n^2, */
+selection sort's time complexity: big O of n^2, binary search's time complexity: big O od log2(n)*/
 #define _CRT_SECURE_NO_WARNINGS
 #define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
 #define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
