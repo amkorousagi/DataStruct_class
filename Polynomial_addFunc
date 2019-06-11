@@ -1,0 +1,108 @@
+/*this source code is written by amkorousagi when in 2016/06/11
+this code shows practice about Polynomial add
+excute: get desending order terms by FILE input, store terms in poloynomial form , add two polynomials, show result
+polynomial add's time complexity: big O of n, */
+#define _CRT_SECURE_NO_WARNINGS
+#define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
+#define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct term {
+	int coefficient;
+	int exponent;
+} term;
+
+
+FILE* fout = fopen("output.txt", "w");
+
+void addPoly(term* C, term* A, term* B, int* startC, int* startA, int* startB, int Alength, int Blength);
+void writePoly(term* poly, int* start, int co, int ex);
+void printPoly(term* poly, int length);
+
+int main() {
+	FILE* fin = fopen("input.txt", "r");
+	int coefficient, exponent;
+	term* arrPolyA;
+	term* arrPolyB;
+	term* arrPolyC;
+	int startA = 0, startB = 0, startC = 0;//point where you read or write
+	int n;//count of input term
+	int m;//count of input term
+	
+
+	fscanf(fin, "%d", &n);
+	arrPolyA = (term*)malloc(sizeof(term)*n);
+
+	for (int i = 0; i < n; i++) {
+		fscanf(fin, "%d %d", &coefficient, &exponent);
+		writePoly(arrPolyA, &startA, coefficient, exponent);
+		
+	}
+	startA = 0;
+
+	fscanf(fin, "%d", &m);
+	arrPolyB = (term*)malloc(sizeof(term)*m);
+
+	for (int i = 0; i < m; i++) {
+		fscanf(fin, "%d %d", &coefficient, &exponent);
+		writePoly(arrPolyB, &startB, coefficient, exponent);
+		
+	}
+	startB = 0;
+
+
+	arrPolyC = (term*)malloc(sizeof(term)*(n + m));
+	addPoly(arrPolyC, arrPolyA, arrPolyB, &startC, &startA, &startB, n, m);
+	
+	printPoly(arrPolyA, n);
+	printPoly(arrPolyB, m);
+	printPoly(arrPolyC, startC);
+	
+	
+
+	fclose(fin);
+	fclose(fout);
+	return 0;
+}
+void addPoly(term* C, term* A, term* B, int* startC, int* startA, int* startB, int Alength, int Blength) {
+	while (true) {
+		switch (COMPARE(A[*startA].exponent,B[*startB].exponent))
+		{
+		case -1: writePoly(C, startC, B[*startA].coefficient, B[*startA].exponent);
+			(*startB)++; 
+			break;
+		case 0: writePoly(C, startC, A[*startA].coefficient + B[*startA].coefficient, B[*startA].exponent);
+			(*startA)++; (*startB)++;
+			break;
+		case 1: writePoly(C, startC, A[*startA].coefficient, A[*startA].exponent);
+			(*startA)++;
+		}
+		if (*startA >= Alength) {
+			while (*startB < Blength) {
+				writePoly(C, startC, B[*startA].coefficient, B[*startA].exponent);
+				(*startB)++;
+			}
+			break;
+		}
+		if (*startB >= Blength) {
+			while (*startA < Alength) {
+				writePoly(C, startC, A[*startA].coefficient, A[*startA].exponent);
+				(*startA)++;
+			}
+			break;
+		}
+	}
+	
+}
+void writePoly(term* poly, int* start, int co, int ex) {
+	poly[*start].coefficient = co;
+	poly[*start].exponent = ex;
+	(*start)++;
+}
+void printPoly(term* poly, int length) {
+	for (int i = 0; i < length; i++) {
+		fprintf(fout, "%dx^%d ", poly[i].coefficient, poly[i].exponent);
+	}
+	fprintf(fout, "\n");
+}
