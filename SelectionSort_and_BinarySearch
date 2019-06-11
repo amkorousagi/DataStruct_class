@@ -60,7 +60,7 @@ int main() {
 		}
 	}
 
-
+	free(list);
 	fclose(fin);
 	fclose(fout);
 	return 0;
