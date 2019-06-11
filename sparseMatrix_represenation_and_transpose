@@ -1,0 +1,125 @@
+/*this source code is written by amkorousagi when in 2019/06/11
+this code shows practice about making Sparse Matrix's representation , transpose the Sparse Matrix
+excute: get 2D sparse matrix  by FILE input, store that in representation form , transpose that , show result
+transpose's time complexity: big O of (col*valid elements), fastTranspose's time complexity: big O of (col+valid elements)*/
+#define _CRT_SECURE_NO_WARNINGS
+#define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
+#define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct term{
+	int row;
+	int col;
+	int val;
+} term;
+
+
+FILE* fout = fopen("output.txt", "w");
+
+void transpose(term* A, term* B);
+void fastTranspose(term* A, term* B);
+void printR(term* R);
+
+int main() {
+	FILE* fin = fopen("input.txt", "r");
+	
+	int row, col, val;
+	int max_list;
+	term* arrRepr;
+	term* arrTrans;
+	int startR = 1;
+	
+	fscanf(fin, "%d %d", &row, &col);
+	max_list = (int)(row*col)*(1.0 / 2);
+	arrRepr = (term*)malloc(sizeof(term)*max_list);
+	arrTrans = (term*)malloc(sizeof(term)*max_list);
+
+	arrRepr[0].row = row;
+	arrRepr[0].col = col;
+	arrRepr[0].val = 0;
+
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			fscanf(fin, "%d", &val);
+			if (val != 0) {
+				arrRepr[startR].row = i;
+				arrRepr[startR].col = j;
+				arrRepr[startR].val = val;
+				arrRepr[0].val++;
+				startR++;
+
+			}
+		}
+	}
+	arrRepr[0].row = row;
+	arrRepr[0].col = col;
+	
+	printR(arrRepr);
+
+	transpose(arrRepr, arrTrans);
+	printR(arrTrans);
+	fastTranspose(arrRepr, arrTrans);
+	printR(arrTrans);
+
+	free(arrRepr);
+	free(arrTrans);
+	fclose(fin);
+	fclose(fout);
+	return 0;
+}
+void transpose(term* A, term* B) {
+	int currentB=0;
+
+	B[currentB].row = A[0].col;
+	B[currentB].col = A[0].row;
+	B[currentB].val = A[0].val;
+	currentB++;
+
+	for (int i = 0; i < A[0].col; i++) {
+		for (int j = 0; j < A[0].val; j++) {//once writing term about some row, see all elements
+			if (i == A[j+1].col) {//when row of B equal col of A
+				B[currentB].row = A[j+1].col;
+				B[currentB].col = A[j+1].row;
+				B[currentB].val = A[j+1].val;
+				currentB++;
+			}
+		}
+	}
+}
+void fastTranspose(term* A, term* B) {
+	int* startPos = (int*)malloc(sizeof(int)*(A[0].col));//means starting index of new matrix's row
+	int* rowTerms = (int*)malloc(sizeof(int)*(A[0].col));//means count of terms on new matrix's row
+	int j;
+	B[0].row = A[0].col;
+	B[0].col = A[0].row;
+	B[0].val = A[0].val;
+	
+
+	for (int i = 0; i < A[0].col; i++) {
+		rowTerms[i] = 0;
+	}
+
+	startPos[0] = 1;
+	for (int i = 0; i < A[0].val; i++) {
+		rowTerms[A[i + 1].col]++;
+	}
+	for (int i = 0; i < A[0].col-1; i++) {
+		startPos[i + 1] = startPos[i] + rowTerms[i];//next element will be start after writing current row's Terms  
+	}
+
+	for (int i = 0; i < A[0].val; i++) {
+		j = startPos[A[i + 1].col];//each term will start at its startPos
+		B[j].row = A[i + 1].col;
+		B[j].col = A[i + 1].row;
+		B[j].val = A[i + 1].val;
+		startPos[A[i + 1].col]++;
+	}
+}
+void printR(term* R) {
+	for (int i = 0; i < R[0].val; i++) {
+		fprintf(fout, "%d %d %d ", R[i+1].row, R[i+1].col, R[i+1].val);
+		fprintf(fout, "\n");
+	}
+	fprintf(fout, "\n");
+}
