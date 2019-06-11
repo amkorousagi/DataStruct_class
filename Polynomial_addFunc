@@ -69,7 +69,7 @@ int main() {
 }
 void addPoly(term* C, term* A, term* B, int* startC, int* startA, int* startB, int Alength, int Blength) {
 	while (true) {
-		switch (COMPARE(A[*startA].exponent,B[*startB].exponent))
+		switch (COMPARE(A[*startA].exponent,B[*startB].exponent))//add term biger exponent than other
 		{
 		case -1: writePoly(C, startC, B[*startA].coefficient, B[*startA].exponent);
 			(*startB)++; 
@@ -80,7 +80,7 @@ void addPoly(term* C, term* A, term* B, int* startC, int* startA, int* startB, i
 		case 1: writePoly(C, startC, A[*startA].coefficient, A[*startA].exponent);
 			(*startA)++;
 		}
-		if (*startA >= Alength) {
+		if (*startA >= Alength) {//if one side reach the end, add the other side's all
 			while (*startB < Blength) {
 				writePoly(C, startC, B[*startA].coefficient, B[*startA].exponent);
 				(*startB)++;
