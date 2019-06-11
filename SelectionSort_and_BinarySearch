@@ -1,4 +1,4 @@
-/*this source code is written by amkorousagi when in 2016/06/11
+/*this source code is written by amkorousagi when in 2019/06/11
 this code shows practice about Selection Sort and Binary Search
 excute: get some integer by FILE input, sort that by selection sort, detect an integer designated by FILE input by binary search in sorted list
 selection sort's time complexity: big O of n^2, binary search's time complexity: big O od log2(n)*/
