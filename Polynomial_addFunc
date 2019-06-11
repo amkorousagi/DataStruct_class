@@ -60,7 +60,9 @@ int main() {
 	printPoly(arrPolyC, startC);
 	
 	
-
+	free(arrPolyA);
+	free(arrPolyB);
+	free(arrPolyC);
 	fclose(fin);
 	fclose(fout);
 	return 0;
