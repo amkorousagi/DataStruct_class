@@ -1,4 +1,4 @@
-/*this source code is written by amkorousagi when in 2016/06/11
+/*this source code is written by amkorousagi when in 2019/06/11
 this code shows practice about Polynomial add
 excute: get desending order terms by FILE input, store terms in poloynomial form , add two polynomials, show result
 polynomial add's time complexity: big O of (n+m), */
