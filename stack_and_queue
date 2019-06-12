@@ -1,0 +1,236 @@
+/*this source code is written by amkorousagi when in 2019/06/12
+this code shows practice about using stack and linear queue
+excute: get some strings and intergers  by FILE input, excute commands corresponding the string
+in this source code, arr's front is not index, it is foremost element's index -1.
+but linked's front means foremost element's address itself
+*/
+#define _CRT_SECURE_NO_WARNINGS
+#define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
+#define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct node{
+	int data;
+	struct node* next;
+} node;
+
+FILE* fin = fopen("input.txt", "r");
+FILE* fout = fopen("output.txt", "w");
+
+void push_arr(node* stack, int* top, int data);
+node* pop_arr(node* stack, int* top);
+void push_linked(node** stack, int data);//if you want conserve or convey node* type, you give func parameter of node** type
+node pop_linked(node** stack);
+
+void add_arr(node* que, int* front, int* rear, int data);
+node* delete_arr(node* que, int* front, int* rear);
+void add_linked(node** que, node** front, node** rear, int data);
+node delete_linked(node** que, node** front, node** rear);
+
+void performer_arr(node* stack, int* top, node* que, int* front, int* rear);
+void performer_linked(node** stack, node** que, node** front, node** rear);
+
+int main() {
+	node* stack_arr;
+	int top=-1;
+	node* stack_linked = NULL;
+	node* que_arr;
+	int front = -1;
+	int rear = -1;
+	node* que_linked = NULL;
+	node* pFront = NULL;
+	node* pRear = NULL;
+
+	int nInput;
+	
+
+	fscanf(fin, "%d", &nInput);
+	stack_arr = (node*)malloc(sizeof(node)*nInput);
+	que_arr = (node*)malloc(sizeof(node)*nInput);
+	
+	fprintf(fout, "performer_arr\n");
+	for (int i = 0; i < nInput; i++) {
+		
+		performer_arr(stack_arr, &top, que_arr, &front, &rear);
+	}
+	fprintf(fout, "\n");
+
+	fprintf(fout, "performer_linked\n");
+
+	fscanf(fin, "%d", &nInput);
+	for (int i = 0; i < nInput; i++) {
+		
+		performer_linked(&stack_linked, &que_linked, &pFront, &pRear);
+	}
+
+	free(stack_arr);
+	free(stack_linked);
+	free(que_arr);
+	free(que_linked);
+	fclose(fin);
+	fclose(fout);
+	return 0;
+}
+void performer_arr(node* stack, int* top, node* que, int* front, int* rear) {
+	char statement[10];
+	int data;
+	node* temp;
+	fscanf(fin, "%s", statement);
+	if (strcmp(statement, "push") == 0) {
+		fscanf(fin, "%d", &data);
+		push_arr(stack, top, data);
+	}
+	else if (strcmp(statement, "pop") == 0) {
+		temp = pop_arr(stack, top);
+		if (temp == NULL) {
+			fprintf(fout, "stack is empty\n");
+		}
+		else {
+			fprintf(fout, "%d\n", temp->data);
+		}
+	}
+	else if (strcmp(statement, "add") == 0) {
+		fscanf(fin, "%d", &data);
+		add_arr(que, front, rear, data);
+	}
+	else if (strcmp(statement, "delete") == 0) {
+		temp = delete_arr(que, front, rear);
+		if (temp == NULL) {
+			fprintf(fout, "queue is empty\n");
+		}
+		else {
+			fprintf(fout, "%d\n", temp->data);
+		}
+	}
+	else {
+		fprintf(fout, "wrong statement\n");
+	}
+}
+void performer_linked(node** stack, node** que, node** front, node** rear) {
+	char statement[10];
+	int data;
+	fscanf(fin, "%s", statement);
+	if (strcmp(statement, "push") == 0) {
+		fscanf(fin, "%d", &data);
+		push_linked(stack, data);
+	}
+	else if (strcmp(statement, "pop") == 0) {
+		data = pop_linked(stack).data;
+		if (data == -1) {
+			fprintf(fout, "stack is empty\n");
+		}
+		else {
+			fprintf(fout, "%d\n", data);
+		}
+	}
+	else if (strcmp(statement, "add") == 0) {
+		fscanf(fin, "%d", &data);
+		add_linked(que, front, rear, data);
+	}
+	else if (strcmp(statement, "delete") == 0) {
+		data = delete_linked(que, front, rear).data;
+		if (data == -1) {
+			fprintf(fout, "queue is empty\n");
+		}
+		else {
+			fprintf(fout, "%d\n", data);
+		}
+	}
+	else {
+		fprintf(fout, "wrong statement\n");
+	}
+}
+void push_arr(node* stack, int* top, int data) {
+	stack[++(*top)].data = data;
+}//basically, you check stack is full but such a thing can not happen in this situation
+node* pop_arr(node* stack, int* top) {
+	if (*top < 0) {//if stack is empty
+		return NULL;
+	}
+	else {
+		return &stack[(*top)--];
+	}
+}
+void push_linked(node** stack, int data) {
+	if (*stack == NULL) {
+		node* temp = (node*)malloc(sizeof(node));
+		temp->data = data;
+		temp->next = NULL;
+
+		*stack = temp;
+	}
+	else {
+		node* temp = (node*)malloc(sizeof(node));
+		temp->data = data;
+		temp->next = *stack;
+
+		*stack = temp;
+	}
+}//basically, you check stack is full but such a thing can not happen in this situation
+node pop_linked(node** stack) {
+	if (*stack == NULL) {// stack is empty
+		node temp = { -1,NULL };
+		return temp;
+	}
+	else{
+		node temp;
+		node* temp2 = *stack;
+		temp.data = (*stack)->data;
+		temp.next = (*stack)->next;
+		*stack = (*stack)->next;
+		free(temp2);
+		return temp;
+	}
+}
+void add_arr(node* que, int* front, int* rear, int data) {
+	que[++(*rear)].data = data;
+}// basically, you check linear queue is full but such a thing can not happen in this situation
+node* delete_arr(node* que, int* front, int* rear) {
+	if (*front >= *rear) {//que is empty
+		return NULL;
+	}
+	else {
+		return &que[++(*front)];
+	}
+}
+void add_linked(node** que, node** front, node** rear, int data) {
+	if (*rear == NULL) {
+		node* temp = (node*)malloc(sizeof(node));
+		
+		temp->data = data;
+		temp->next = NULL;
+		*front = temp;
+		*rear = temp;
+		*que = temp;
+	}
+	else {
+		node* temp = (node*)malloc(sizeof(node));
+
+		temp->data = data;
+		temp->next = NULL;
+		(*rear)->next = temp;
+		(*rear) = temp;
+	}
+}// basically, you check linear queue is full but such a thing can not happen in this situation
+node delete_linked(node** que, node** front, node** rear) {
+	if (*front == NULL) {//if queue is empty
+		node temp = { -1,NULL };
+		return temp;
+	}
+	else {
+
+		node temp;
+		node* temp2;
+		temp2 = *front;
+		temp.data = (*front)->data;
+		temp.next = (*front)->next;
+		*front = (*front)->next;
+		*que = *front;
+		free(temp2);
+		return temp;
+
+	}
+
+}
