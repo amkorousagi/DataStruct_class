@@ -1,0 +1,221 @@
+/*this source code is written by amkorousagi when in 2019/06/13
+this code shows practice about mazing problem
+excute: get some intergers in form of 2D array by FILE input, find a way from given position to given destination, print the way 
+mazing problem's time complexity: O(row* col) becuase it checked all element in worst case
+*/
+#define _CRT_SECURE_NO_WARNINGS
+#define SWAP(t,a,b) ((t)=(a),(a)=(b),(b)=(t))
+#define COMPARE(a,b) ((a)<(b))?-1:((a)==(b))?0:1//a<b-->-1, a==b-->0, a>b-->1
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+enum direction {N,NE,E,SE,S,SW,W,NW};
+
+typedef struct node{
+	int row;
+	int col;
+	int dir;
+} node;
+
+FILE* fin = fopen("input.txt", "r");
+FILE* fout = fopen("output.txt", "w");
+
+node* stack = NULL;
+int top =-1;
+int stack_size;
+int** mazing;
+int** visited;
+node startN;
+node desN;
+bool success = false;
+int row, col;
+
+//mazing
+//if mazing[i][j]==0 and visited[i][j]==0
+//current state store and go there(it can implement recursively or iteratively)
+//else go back and find other way
+void recursiveMaze(node temp);
+void iterativeMaze();
+void push(node* data);
+node* pop();
+int xDirect(int d);
+int yDirect(int d);
+void printStack();
+int main() {
+
+	int data;
+	int startRow, startCol;
+	int desRow, desCol;
+	
+
+	fscanf(fin, "%d %d", &row, &col);
+	stack = (node*)malloc(sizeof(node)*(row*col));
+	stack_size = row * col;
+	mazing = (int**)malloc(sizeof(int*)*(row + 2));
+	visited = (int**)malloc(sizeof(int*)*(row + 2));
+	for (int i = 0; i < row+2; i++) {
+		mazing[i] = (int*)malloc(sizeof(int)*(col + 2));
+		visited[i] = (int*)malloc(sizeof(int)*(col + 2));
+		for (int j = 0; j < col + 2; j++) {
+			if (i == 0||i==row+1) {
+				mazing[i][j] = 1;
+			}
+			if (j == 0 || j == col+1) {
+				mazing[i][j] = 1;
+			}
+			visited[i][j] = 0;
+		}
+	}//surrounded mazing 2D arr by 1
+
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			fscanf(fin, "%d", &data);
+			mazing[i+1][j+1] = data;
+		}
+	}
+	
+	fscanf(fin, "%d %d", &(startN.row), &(startN.col)); startN.dir = 0;
+	fscanf(fin, "%d %d", &desN.row, &desN.col);
+	push(&startN);
+	recursiveMaze(startN);
+	push(&desN);
+	printStack();
+
+	for (int i = 0; i < row + 2; i++) {
+		
+		for (int j = 0; j < col + 2; j++) {
+			
+			visited[i][j] = 0;
+		}
+	}
+	top = -1;
+	success = false;
+	iterativeMaze();
+	printStack();
+
+	
+
+	free(mazing);
+	free(visited);
+	free(stack);
+	fclose(fin);
+	fclose(fout);
+	return 0;
+}
+void push(node* data) {
+	if (top < stack_size) {
+		stack[++top] = *data;
+	}
+	else {
+		fprintf(fout,"stack is full\n");
+		exit(EXIT_FAILURE);
+	}
+}
+node* pop() {
+	if (top > -1) {
+		return &stack[top--];
+	}
+	else {
+		fprintf(fout, "stack is empty\n");
+		exit(EXIT_FAILURE);
+	}
+}
+void recursiveMaze(node temp){
+	node temp2;
+	while (success == false) {
+		if (temp.row + yDirect(temp.dir)>0&& temp.row + yDirect(temp.dir) < row + 2 && temp.col + xDirect(temp.dir)>0 && temp.col + xDirect(temp.dir) < col + 2) {
+
+			if (mazing[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] == 0 && visited[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] == 0) {
+				temp2.row = temp.row + yDirect(temp.dir);
+				temp2.col = temp.col + xDirect(temp.dir);
+				temp2.dir = 0;
+				visited[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] = 1;
+				push(&temp2);//we push node we stand currently
+				recursiveMaze(temp2);
+				//printStack();
+
+			}
+			if (desN.row == temp.row + yDirect(temp.dir) && desN.col == temp.col + xDirect(temp.dir)) {
+				success = true;
+				return;
+			}
+		}
+		
+		temp.dir++;
+		if (temp.dir >= 8) {
+			pop();
+			break;
+		}
+	}
+
+	
+	
+	
+}
+int xDirect(int d) {
+	if (d == N||d==S) {
+		return 0;
+	}
+	else if(d==NE||d==E||d==SE){
+		return 1;
+	}
+	else if (d == SW||d==W||d==NW) {
+		return -1;
+	}
+	else {
+		exit(EXIT_FAILURE);
+	}
+}
+int yDirect(int d) {
+	if (d == NW || d == N || d == NE) {
+		return 1;
+	}
+	else if (d == SW || d == S || d == SE) {
+		return -1;
+	}
+	else if (d == E || d == W) {
+		return 0;
+	}
+	else {
+		exit(EXIT_FAILURE);
+	}
+}
+void printStack() {
+	for (int i = 0; i <= top; i++) {
+		fprintf(fout, "%d %d\n", stack[i].row, stack[i].col);
+	}
+	fprintf(fout, "\n");
+}
+void iterativeMaze() {
+	push(&startN);
+	node temp = *pop();
+	visited[temp.row][temp.col] = 1;
+	node temp2;
+	while (success == false) {
+		if (temp.row + yDirect(temp.dir) > 0 && temp.row + yDirect(temp.dir) < row + 1 && temp.col + xDirect(temp.dir) > 0 && temp.col + xDirect(temp.dir) < col + 1) {
+
+			if (mazing[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] == 0 && visited[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] == 0) {
+				temp2.row = temp.row + yDirect(temp.dir);
+				temp2.col = temp.col + xDirect(temp.dir);
+				temp2.dir = 0;
+				visited[temp.row + yDirect(temp.dir)][temp.col + xDirect(temp.dir)] = 1;
+				temp.dir++;//in next turn,  we will check the direction we yet do not checked
+				push(&temp);//we push node we will come back to if failed
+				if (desN.row ==temp2.row && desN.col == temp2.col) {//if where we will go is des
+					push(&temp2);
+					success = true;
+					break;
+				}
+				temp = temp2;
+				continue;
+
+			}
+			
+		}
+		temp.dir++;
+		if (temp.dir >= 8) {
+			temp = *pop();
+		}
+	}
+}
